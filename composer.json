@@ -1,0 +1,19 @@
+{
+    "name": "ansta/sequr",
+    "description": "A Method of sending a receiving requests from seqr",
+    "authors": [
+        {
+            "name": "Aaryanna Simonelli",
+            "email": "ashleighsimonelli@gmail.com"
+        }
+    ],
+    "autoload" : {
+        "psr-4" : {
+            "Ansta\\Seqr\\" : "src/"
+        }
+    },
+    "require" : {
+        "php" : ">=5.5",
+        "guzzlehttp/guzzle" : "6.2.3"
+    }
+}
