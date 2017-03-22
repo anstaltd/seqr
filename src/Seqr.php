@@ -1,16 +1,17 @@
 <?php
 
-namespace Ansta/Sequr;
+namespace Ansta\Seqr;
 
-use Seqr\Constraints\Items;
-use Seqr\Constraints\Order;
-use Seqr\Exceptions\SeqrException;
+use Ansta\Seqr\Constraints\Items;
+use Ansta\Seqr\Constraints\Order;
+use Ansta\Seqr\Exceptions\SeqrException;
+use Ansta\Seqr\Exceptions\SeqrRequiredConfigException;
 
 /**
  * Class Sequr
  * @package Ansta
  */
-class Sequr extends \SoapClient
+class Seqr extends \SoapClient
 {
     /**
      * @var string
@@ -25,7 +26,7 @@ class Sequr extends \SoapClient
     /**
      * @var array
      */
-    private $requiredConfigs = [
+    private static $requiredConfigs = [
         'terminalId',
         'password',
         'currency',
@@ -38,7 +39,10 @@ class Sequr extends \SoapClient
     public function __construct(Array $configs = [])
     {
         $this->setConfigs($configs);
-        parent::__construct(self::$route);
+        parent::__construct(self::$route, [
+            'exceptions' => true,
+            'trace' => true,
+        ]);
     }
 
     /**
@@ -47,7 +51,7 @@ class Sequr extends \SoapClient
     private function setConfigs($configs)
     {
         foreach(self::$requiredConfigs as $required) {
-            if (!in_array($required, $configs)) throw new SeqrRequiredConfigException($required . ' is a required config');
+            if (!in_array($required, array_keys($configs))) throw new SeqrRequiredConfigException($required . ' is a required config');
         }
 
         self::$configs = $configs;
@@ -65,17 +69,26 @@ class Sequr extends \SoapClient
     public function sendInvoice(Items $items, Order $order, $acknowledgement = false, $backURL = null, $notificationUrl = null)
     {
         $invoice = [
-            'acknowledgementMode' => $acknowledgement ? 'ACKNOWLEDGE' : 'NO_ACKNOWLEDGE',
-            'invoiceRows' => $items->items,
+            'acknowledgementMode' => $acknowledgement ? 'ACKNOWLEDGEMENT' : 'NO_ACKNOWLEDGMENT',
+            'title' => 'Testing',
             'totalAmount' => [
                 'currency' => self::$configs['currency'],
                 'value' => $items->total,
             ],
-            'title' => $order->id,
+            'invoiceRows' => $items->items,
         ];
 
         if ($backURL) $invoice['backURL'] = $backURL;
         if ($notificationUrl) $invoice['notificationUrl'] = $notificationUrl;
+
+        echo'<pre>';
+
+        print_r([
+            'context' => $this->getContextArray(),
+            'invoice' => $invoice,
+        ]);
+
+        echo '</pre>';
 
         try {
 
@@ -84,11 +97,15 @@ class Sequr extends \SoapClient
                 'invoice' => $invoice,
             ]);
 
+            var_Dump($result);
+
         } catch (\Exception $e) {
             throw new SeqrException($e->getMessage());
         }
 
-        return json_decode($result->return);
+        var_Dump($result->return);
+
+        return json_decode($result->return, true);
 
     }
 

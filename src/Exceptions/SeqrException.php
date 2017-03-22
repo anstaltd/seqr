@@ -1,6 +1,6 @@
 <?php
 
-namespace Seqr\Exceptions;
+namespace Ansta\Seqr\Exceptions;
 
 /**
  * Class SeqrException

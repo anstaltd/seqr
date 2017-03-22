@@ -1,6 +1,6 @@
 <?php
 
-namespace Seqr\Constraints;
+namespace Ansta\Seqr\Constraints;
 
 /**
  * Class Item

@@ -1,12 +1,12 @@
 <?php
 
-namespace Seqr\Constraints;
+namespace Ansta\Seqr\Constraints;
 
 /**
  * Class Order
  * @package Seqr
  */
-class Order extends Constriant
+class Order extends Constraint
 {
 
 }

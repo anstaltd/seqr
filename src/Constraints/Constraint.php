@@ -1,8 +1,8 @@
 <?php
 
-namespace Seqr\Constraints;
+namespace Ansta\Seqr\Constraints;
 
-Abstract class Constraint
+Abstract Class Constraint
 {
     /**
      * @var array
