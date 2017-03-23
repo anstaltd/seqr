@@ -32,6 +32,7 @@ class Seqr extends \SoapClient
         'terminalId',
         'password',
         'currency',
+        'qrImagePath',
     ];
 
     /**
@@ -100,12 +101,18 @@ class Seqr extends \SoapClient
             $renderer->setHeight(300);
             $renderer->setWidth(300);
 
+            if (!file_exists(self::$configs['qrImagePath'].DIRECTORY_SEPARATOR)) throw new SeqrException('Path for ' . self::$configs['qrImagePath'].DIRECTORY_SEPARATOR . ' was not found');
+
             $name = $result->return->invoiceReference.'.png';
 
             $writer = new Writer($renderer);
             $writer->writeFile($result->return->invoiceQRCode, $name);
 
-            return array_merge((array)$result->return, ['QRImage' => $name]);
+            rename(PUBLIC_ROOT.$name, self::$configs['qrImagePath'].DIRECTORY_SEPARATOR.$name);
+
+            $parts = explode('/public_html/', self::$configs['qrImagePath']);
+
+            return array_merge((array)$result->return, ['QRImage' => $parts[1].DIRECTORY_SEPARATOR.$name]);
         }
 
         else return (array) $result->return;
