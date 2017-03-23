@@ -6,6 +6,8 @@ use Ansta\Seqr\Constraints\Items;
 use Ansta\Seqr\Constraints\Order;
 use Ansta\Seqr\Exceptions\SeqrException;
 use Ansta\Seqr\Exceptions\SeqrRequiredConfigException;
+use BaconQrCode\Renderer\Image\Png as QR;
+use BaconQrCode\Writer;
 
 /**
  * Class Sequr
@@ -66,14 +68,14 @@ class Seqr extends \SoapClient
      * @return mixed
      * @throws SeqrException
      */
-    public function sendInvoice(Items $items, Order $order, $acknowledgement = false, $backURL = null, $notificationUrl = null)
+    public function sendInvoice(Items $items, Order $order, $acknowledgement = false, $qrcode = true, $backURL = null, $notificationUrl = null)
     {
         $invoice = [
-            'acknowledgementMode' => $acknowledgement ? 'ACKNOWLEDGEMENT' : 'NO_ACKNOWLEDGMENT',
+            'acknowledgmentMode' => $acknowledgement ? 'ACKNOWLEDGMENT' : 'NO_ACKNOWLEDGMENT',
             'title' => 'Testing',
             'totalAmount' => [
                 'currency' => self::$configs['currency'],
-                'value' => $items->total,
+                'value' => $order->amount,
             ],
             'invoiceRows' => $items->items,
         ];
@@ -92,7 +94,21 @@ class Seqr extends \SoapClient
             throw new SeqrException($e->getMessage());
         }
 
-        return (array) $result->return;
+        if ($qrcode) {
+            $renderer = new QR();
+
+            $renderer->setHeight(300);
+            $renderer->setWidth(300);
+
+            $name = $result->return->invoiceReference.'.png';
+
+            $writer = new Writer($renderer);
+            $writer->writeFile($result->return->invoiceQRCode, $name);
+
+            return array_merge((array)$result->return, ['QRImage' => $name]);
+        }
+
+        else return (array) $result->return;
 
     }
 
@@ -114,7 +130,7 @@ class Seqr extends \SoapClient
             throw new SeqrException($e->getMessage());
         }
 
-        return (array) $result;
+        return (array) $result->return;
     }
 
     /**
