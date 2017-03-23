@@ -81,15 +81,6 @@ class Seqr extends \SoapClient
         if ($backURL) $invoice['backURL'] = $backURL;
         if ($notificationUrl) $invoice['notificationUrl'] = $notificationUrl;
 
-        echo'<pre>';
-
-        print_r([
-            'context' => $this->getContextArray(),
-            'invoice' => $invoice,
-        ]);
-
-        echo '</pre>';
-
         try {
 
             $result = parent::sendInvoice([
@@ -97,15 +88,11 @@ class Seqr extends \SoapClient
                 'invoice' => $invoice,
             ]);
 
-            var_Dump($result);
-
         } catch (\Exception $e) {
             throw new SeqrException($e->getMessage());
         }
 
-        var_Dump($result->return);
-
-        return json_decode($result->return, true);
+        return (array) $result->return;
 
     }
 
@@ -127,7 +114,7 @@ class Seqr extends \SoapClient
             throw new SeqrException($e->getMessage());
         }
 
-        return json_decode($result);
+        return (array) $result;
     }
 
     /**
