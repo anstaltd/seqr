@@ -72,17 +72,20 @@ class Seqr extends \SoapClient
     public function sendInvoice(Items $items, Order $order, $acknowledgement = false, $qrcode = true, $backURL = null, $notificationUrl = null)
     {
         $invoice = [
+            'paymentMode' => 'IMMEDIATE_DEBIT',
             'acknowledgmentMode' => $acknowledgement ? 'ACKNOWLEDGMENT' : 'NO_ACKNOWLEDGMENT',
-            'title' => 'Testing',
+            'title' => 'Alibongo seeds',
+            'clientInvoiceId' => $order->id,
             'totalAmount' => [
                 'currency' => self::$configs['currency'],
                 'value' => $order->amount,
             ],
+            //'issueDate' => (new \DateTime('now'))->format('Y-m-d H:i:s'),
             'invoiceRows' => $items->items,
         ];
 
-        if ($backURL) $invoice['backURL'] = $backURL;
-        if ($notificationUrl) $invoice['notificationUrl'] = $notificationUrl;
+        if ($backURL) { $invoice['backURL'] = $backURL; }
+        if ($notificationUrl) { $invoice['notificationUrl'] = $notificationUrl; }
 
         try {
 
